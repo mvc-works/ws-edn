@@ -1,21 +1,26 @@
 {
   "name": "ws-json-server",
-  "version": "0.0.1",
-  "description": "ws-json adds a little abstraction to websocket",
+  "version": "0.0.2-1",
+  "description": "EventEmitter like API for WebSocket, in server-side.",
   "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "coffee test.coffee"
   },
-  "repository": "",
-  "keywords": [
-    "websocket",
-    "json"
-  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/jiyinyiyong/ws-json-server.git"
   },
+  "keywords": [
+    "websocket",
+    "json"
+  ],
   "author": "jiyinyiyong",
-  "license": "BSD",
-  "readmeFilename": "readme.md"
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "ws": "^0.4.31"
+  },
+  "devDependencies": {
+    "shelljs": "^0.2.6"
+  }
 }
