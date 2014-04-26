@@ -17,7 +17,7 @@ exports.listen = (port, handle) ->
 
     emitCalls = {}
     ws.emit = (key, value, callback) ->
-      unless callback?
+      if typeof value is 'function'
         callback = value
         value = null
       id = u.id()
@@ -28,6 +28,11 @@ exports.listen = (port, handle) ->
       [key, value, id] = JSON.parse data
       routes[key]? value, (ret) -> send [key, ret, id]
       emitCalls[id]? value
+
+    affairs = []
+    ws.listenTo = (source, affair, callback) ->
+      affairs.push {source, affair, callback}
+      source.on affair, callback
     
     closeCalls = []
     ws.closed = no
@@ -35,5 +40,15 @@ exports.listen = (port, handle) ->
     socket.on 'close', ->
       ws.closed = yes
       do callback for callback in closeCalls
+
+      for pair in affairs
+        {source, affair, callback} = pair
+        source.removeListener affair, callback
+
+      ws = null
+      socket = null
+      routes = null
+      emitCalls = null
+      affairs = null
 
     handle ws
