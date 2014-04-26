@@ -17,6 +17,7 @@ exports.listen = (port, handle) ->
 
     emitCalls = {}
     ws.emit = (key, value, callback) ->
+      callback = value unless callback?
       id = u.id()
       send [key, value, id]
       emitCalls[id] = callback

@@ -42,8 +42,10 @@ Start server:
 
 Communication is based on `[key, value, id]`:
 
-* `ws.emit`: `key, value, (data) ->`
+* `ws.emit`: `key, value, (data) ->`,
+`value` is optional,
 `data` is what client callbacked
+
 * `ws.on`: `key, (value, res) ->`,
 `res` can be used like `res value` to send data back
 
