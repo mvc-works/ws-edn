@@ -15,35 +15,42 @@ npm install ws-json-server
 ```coffee
 server = require 'ws-json-server'
 
-server.listen(3000).each (ws) ->
-  console.log 'new connection'
+server.listen 3000, (ws) ->
 
-  ws.emit "greet", "hello"
-  
-  ws.on "greet", (data) -> console.log "greet", data
+  ws.on 'greet', (data, res) ->
+    console.log 'cient sent:', data
+    res 'hello client'
 
-  setTimeout (-> ws.emit "delay", "delay can send"), 2000
+  ws.emit 'welcome', 'websocket', (data) ->
+    console.log 'client returns:', data
 
-  ws.on "repeat", (data) ->
-    setTimeout (-> ws.emit "repeat", data + 1), 1000
+  ws.on "repeat", (data, res) ->
+    setTimeout (-> res (data + 1)), 2000
+    console.log "repeat", data
 
-    console.log "repeating", data
+  ws.onclose ->
+    console.log 'connect closed'
 
   ws.emit "repeat", 1
-
 ```
 
 ### API
 
+Start server:
+
 * `server.listen(port).each`: `(ws) ->`
-* `ws.emit`: `key, value`
-* `ws.on`: `key, (value) ->`
+
+Communication is based on `[key, value, id]`:
+
+* `ws.emit`: `key, value, (data) ->`
+`data` is what client callbacked
+* `ws.on`: `key, (value, res) ->`,
+`res` can be used like `res value` to send data back
+
+When close:
+
 * `ws.onclose`: `->`
 * `ws.closed`
-
-### Protocol
-
-This implementation is simple, just using `[key, value]` as JSON.
 
 ### Development
 

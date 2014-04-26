@@ -1,28 +1,30 @@
 
 WebSocket = require("ws").Server
 
+u = n: 0, id: -> "s#{@n += 1}"
+
 exports.listen = (port, handle) ->
-  server = new WebSocket {port}
+  (new WebSocket {port}).on "connection", (socket) ->
 
-  routes = {}
-  
-  ws = {}
-  ws.on = (key, callback) -> routes[key] = callback
+    ws = closed: no
 
-  server.on "connection", (socket) ->
+    send = (data) ->
+      return console.log 'WS-JSON: already closed' if ws.closed
+      socket.send (JSON.stringify data)
+    
+    routes = {}
+    ws.on = (key, callback) -> routes[key] = callback
 
-    console.log 'socket'
-
-    ws.emit = (key, value) ->
-      if ws.closed
-        console.log 'WS-JSON: emit when closed'
-        return
-      socket.send JSON.stringify [key, value]
+    emitCalls = {}
+    ws.emit = (key, value, callback) ->
+      id = u.id()
+      send [key, value, id]
+      emitCalls[id] = callback
     
     socket.on "message", (data) ->
-      data = JSON.parse data
-      routes[data[0]]? data[1]
-
+      [key, value, id] = JSON.parse data
+      routes[key]? value, (ret) -> send [key, ret, id]
+      emitCalls[id]? value
     
     closeCalls = []
     ws.closed = no

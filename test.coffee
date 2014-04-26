@@ -2,18 +2,17 @@
 server = require("./src/")
 
 server.listen 3000, (ws) ->
-  console.log 'new connection'
 
-  ws.emit "greet", "hello"
-  
-  ws.on "greet", (data) -> console.log "greet", data
+  ws.on 'greet', (data, res) ->
+    console.log 'cient sent:', data
+    res 'hello client'
 
-  setTimeout (-> ws.emit "delay", "delay can send"), 2000
+  ws.emit 'welcome', 'websocket', (data) ->
+    console.log 'client returns:', data
 
-  ws.on "repeat", (data) ->
-    setTimeout (-> ws.emit "repeat", data + 1), 1000
-
-    console.log "repeating", data
+  ws.on "repeat", (data, res) ->
+    setTimeout (-> res (data + 1)), 2000
+    console.log "repeat", data
 
   ws.onclose ->
     console.log 'connect closed'
