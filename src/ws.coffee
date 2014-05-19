@@ -5,7 +5,7 @@ u =
 
 exports.WS = class
   constructor: (@_socket) ->
-    @_routers = {}
+    @_routes = {}
     @_emitCalls = {}
     @_events = {}
     @_closeCalls = []
@@ -14,48 +14,50 @@ exports.WS = class
 
     @_listen()
 
-  emit: (key, value, callback) ->
+  emit: (key, value, cb) ->
     if typeof value is 'function'
-      callback = value
+      cb = value
       value = null
     id = u.id()
     @_send [key, value, id]
     @_emitCalls[id] = 1
 
-  on: (key, callback) ->
-    @_routes[key] = callback
+  on: (key, cb) ->
+    @_routes[key] = cb
 
   _send: (data) ->
-    return console.log 'WS-JSON: already closed' if @closed
+    if @closed
+      return console.log 'WS-JSON: already closed'
     @_socket.send (JSON.stringify data)
 
   _listen: ->
     @_socket.on "message", (data) =>
       @_handleMessage data
 
-    @_socket.on 'close', ->
+    @_socket.on 'close', =>
       @_handleClose()
 
-  listenTo: (source, affair, callback) ->
-    @_affairs.push {source, affair, callback}
-    source.on affair, callback
+  listenTo: (source, message, cb) ->
+    @_events.push [source, message, cb]
+    source.on message, cb
 
-  onclose: (callback) ->
-    @_closeCalls.push callback
+  onclose: (cb) ->
+    @_closeCalls.push cb
 
   _handleClose: ->
     @closed = yes
 
-    do callback for callback in @_closeCalls
+    do cb for cb in @_closeCalls
 
-    for pair in @_affairs
-      {source, affair, callback} = pair
-      source.removeListener affair, callback
+    for pair in @_events
+      [source, message, cb] = pair
+      source.removeListener message, cb
 
     @_socket = null
     @_routes = null
     @_emitCalls = null
-    @_affairs = null
+    @_events = null
+    @_closeCalls = null
 
   _handleMessage: (data) ->
     [key, value, id] = JSON.parse data
