@@ -17,4 +17,14 @@ server.listen 3000, (ws) ->
   ws.onclose ->
     console.log 'connect closed'
 
+  ws.join 'a'
+
+  ws.on 'cast', (data, res) ->
+    console.log 'cast:', data
+    ws.cast 'a', 'cast', 'sent by join'
+
+  ws.bind 'cast', (value) ->
+    console.log 'hear:', value
+    ws.emit 'cast', 'data'
+
   ws.emit "repeat", 1

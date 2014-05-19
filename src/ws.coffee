@@ -3,16 +3,25 @@ u =
   n: 0
   id: -> "s#{@n += 1}"
 
+clients = []
+channels = {}
+
+_remove = (list, item) ->
+  if item in list
+    list.splice (list.indexOf item), 1
+
 exports.WS = class
   constructor: (@_socket) ->
     @_routes = {}
     @_emitCalls = {}
     @_events = {}
     @_closeCalls = []
+    @_bindings = {}
 
     @closed = no
 
     @_listen()
+    clients.push @
 
   emit: (key, value, cb) ->
     if typeof value is 'function'
@@ -20,7 +29,7 @@ exports.WS = class
       value = null
     id = u.id()
     @_send [key, value, id]
-    @_emitCalls[id] = 1
+    @_emitCalls[id] = cb
 
   on: (key, cb) ->
     @_routes[key] = cb
@@ -59,7 +68,40 @@ exports.WS = class
     @_events = null
     @_closeCalls = null
 
+    _remove clients, @
+    for _, room of channels
+      _remove room, @
+
   _handleMessage: (data) ->
     [key, value, id] = JSON.parse data
     @_routes[key]? value, (ret) => @_send [key, ret, id]
     @_emitCalls[id]? value
+
+  _trigger: (key, value) ->
+    @_bindings[key]? value
+
+  bind: (key, cb) ->
+    @_bindings[key] = cb
+
+  join: (chan) ->
+    unless channels[chan]?
+      channels[chan] = []
+    channels[chan].push @
+
+  leave: (chan) ->
+    room = channels[chan]
+    _remove room, @
+    if room.length is 0
+      channels[chan] = null
+
+  broadcast: (key, value) ->
+    for client in clients
+      unless client is @
+        client._trigger key, value
+
+  cast: (chan, key, value) ->
+    room = channels[chan]
+    if room?
+      for client in room
+        unless client is @
+          client._trigger key, value

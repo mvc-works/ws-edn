@@ -61,6 +61,20 @@ To stay away from memory leak, a solution from Backbone.
 * `ws.listenTo`: `source, eventName, (value) ->`,
 it uses `.removeListener()` internally
 
+* `ws.join`: `room`
+* `ws.leave`: `room`
+
+To join and leave room which is represented in string.
+
+* `ws.broadcast`: `key, value`
+* `ws.cast`: `room, key, value`
+
+Broadcast message in rooms and in a specified room.
+
+* `ws.bind`: `(key, value) ->`
+
+Listen events from broadcast and activate a callback.
+
 ### Development
 
 Read `make.coffee` for more.
