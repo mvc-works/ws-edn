@@ -32,7 +32,11 @@ exports.WS = class
     @_emitCalls[id] = cb
 
   on: (key, cb) ->
-    @_routes[key] = cb
+    unless @_routes[key]?
+      @_routes[key] = []
+    queue = @_routes[key]
+    unless cb in queue
+      queue.push cb
 
   _send: (data) ->
     if @closed
@@ -74,14 +78,25 @@ exports.WS = class
 
   _handleMessage: (data) ->
     [key, value, id] = JSON.parse data
-    @_routes[key]? value, (ret) => @_send [key, ret, id]
+
+    if @_routes[key]?
+      for cb in @_routes[key]
+        cb value, (ret) => @_send [key, ret, id]
+
     @_emitCalls[id]? value
 
   _trigger: (key, value) ->
-    @_bindings[key]? value
+    console.log '_trigger'
+    if @_bindings[key]?
+      for cb in @_bindings[key]
+        cb value
 
   bind: (key, cb) ->
-    @_bindings[key] = cb
+    unless @_bindings[key]?
+      @_bindings[key] = []
+    queue = @_bindings[key]
+    unless cb in queue
+      queue.push cb
 
   join: (chan) ->
     unless channels[chan]?

@@ -27,4 +27,11 @@ server.listen 3000, (ws) ->
     console.log 'hear:', value
     ws.emit 'cast', 'data'
 
+  ws.bind 'cast', (value) ->
+    console.log 'hear2:', value
+
   ws.emit "repeat", 1
+
+  ws.on 'repeat', (n) ->
+    console.log 'another:', n
+    ws.broadcast 'cast', 'another'

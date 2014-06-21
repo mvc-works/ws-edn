@@ -1,6 +1,6 @@
 {
   "name": "ws-json-server",
-  "version": "0.0.5-1",
+  "version": "0.0.6",
   "description": "EventEmitter like API for WebSocket, in server-side.",
   "main": "lib/index.js",
   "scripts": {
