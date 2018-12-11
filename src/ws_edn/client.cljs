@@ -1,28 +1,30 @@
 
-(ns ws-edn.client )
+(ns ws-edn.client (:require [cljs.reader :refer [read-string]] [cljs.spec.alpha :as s]))
 
 (defonce *global-ws (atom nil))
 
-(defn send! [op op-data]
-  (let [ws @*global-ws]
-    (if (some? ws)
-      (.send ws (pr-str [op op-data]))
-      (.warn js/console "WebSocket at close state!"))))
-
-(defn setup-socket! [*store configs]
-  (let [ws-url (:url configs), ws (js/WebSocket. ws-url)]
+(defn connect! [ws-url options]
+  (assert (string? ws-url) "reqiured an url for ws server")
+  (let [ws (js/WebSocket. ws-url)]
     (reset! *global-ws ws)
     (set!
-     ws.onopen
-     (fn [event] (let [listener (:on-open! configs)] (if (fn? listener) (listener event)))))
+     (.-onopen ws)
+     (fn [event] (when-let [on-open! (:on-open! options)] (on-open! event))))
     (set!
-     ws.onclose
+     (.-onclose ws)
      (fn [event]
        (reset! *global-ws nil)
-       (let [listener (:on-close! configs)] (if (fn? listener) (listener event)))))
+       (when-let [on-close! (:on-close! options)] (on-close! event))))
     (set!
-     ws.onmessage
+     (.-onmessage ws)
      (fn [event]
-       (let [changes (reader/read-string event.data)]
-         (.log js/console "Changes" (clj->js changes))
-         (reset! *store (patch-twig @*store changes)))))))
+       (when-let [on-data! (:on-data! options)] (on-data! (read-string (.-data event))))))
+    (set!
+     (.-onerror ws)
+     (fn [error]
+       (js/console.error "Failed to establish connection" error)
+       (when-let [on-error! (:on-error! options)] (on-error! error))))))
+
+(defn send! [data]
+  (let [ws @*global-ws]
+    (if (some? ws) (.send ws (pr-str data)) (.warn js/console "WebSocket at close state!"))))

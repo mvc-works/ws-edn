@@ -1,29 +1,44 @@
 
-(ns ws-edn.server )
+(ns ws-edn.server
+  (:require [cljs.reader :refer [read-string]]
+            ["ws" :as ws]
+            ["shortid" :as shortid]
+            [cljs.spec.alpha :as s]))
 
-(defonce *registry (atom {}))
+(defonce *global-connections (atom {}))
 
-(defn run-server! [on-action! port]
+(defn send! [sid data]
+  (let [socket (get @*global-connections sid)]
+    (if (some? socket)
+      (.send socket (pr-str data))
+      (js/console.warn "socket not found for" sid))))
+
+(defn start-server! [port options]
+  (assert (number? port) "first argument is port")
   (let [WebSocketServer (.-Server ws), wss (new WebSocketServer (js-obj "port" port))]
     (.on
      wss
      "connection"
      (fn [socket]
        (let [sid (.generate shortid)]
-         (on-action! :session/connect nil sid)
-         (swap! *registry assoc sid socket)
-         (.info js/console "New client.")
+         (swap! *global-connections assoc sid socket)
+         (when-let [on-open! (:on-open! options)] (on-open! sid socket))
          (.on
           socket
           "message"
           (fn [rawData]
-            (let [action (reader/read-string rawData), [op op-data] action]
-              (on-action! op op-data sid))))
+            (when-let [on-data! (:on-data! options)] (on-data! sid (read-string rawData)))))
          (.on
           socket
           "close"
-          (fn []
-            (.warn js/console "Client closed!")
-            (swap! *registry dissoc sid)
-            (on-action! :session/disconnect nil sid)))
-         (.on socket "error" (fn [error] (.error js/console error))))))))
+          (fn [event]
+            (swap! *global-connections dissoc sid)
+            (when-let [on-close! (:on-close! options)] (on-close! sid event))))
+         (.on
+          socket
+          "error"
+          (fn [error]
+            (swap! *global-connections dissoc sid)
+            (when-let [on-error! (:on-error! options)] (on-error! sid error)))))))
+    (.on wss "listening" (fn [] (println "listening")))
+    (.on wss "error" (fn [error] (println "error" error)))))

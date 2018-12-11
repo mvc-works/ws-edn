@@ -7,8 +7,8 @@
  :builds {:client {:output-dir "target/"
                    :asset-path "./"
                    :target :browser
-                   :modules {:client {:init-fn app.client/main!}}
-                   :devtools {:after-load app.client/reload!
+                   :modules {:client {:init-fn ws-edn.page/main!}}
+                   :devtools {:after-load ws-edn.page/reload!
                               :http-root "target"
                               :http-port 7000}
                    :release {:output-dir "dist/"}
@@ -16,6 +16,6 @@
                              :build-options {:manifest-name "assets.edn"}}
           :server {:target :node-script
                    :output-to "target/server.js"
-                   :main app.server/main!
-                   :devtools {:after-load app.server/reload!}
+                   :main ws-edn.main/main!
+                   :devtools {:after-load ws-edn.main/reload!}
                    :release {:output-to "dist/server.js"}}}}
