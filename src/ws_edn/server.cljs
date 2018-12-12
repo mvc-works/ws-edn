@@ -7,13 +7,13 @@
 
 (defonce *global-connections (atom {}))
 
-(defn send! [sid data]
+(defn wss-send! [sid data]
   (let [socket (get @*global-connections sid)]
     (if (some? socket)
       (.send socket (pr-str data))
       (js/console.warn "socket not found for" sid))))
 
-(defn start-server! [port options]
+(defn wss-serve! [port options]
   (assert (number? port) "first argument is port")
   (let [WebSocketServer (.-Server ws), wss (new WebSocketServer (js-obj "port" port))]
     (.on

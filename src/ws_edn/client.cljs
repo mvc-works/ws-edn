@@ -3,7 +3,7 @@
 
 (defonce *global-ws (atom nil))
 
-(defn connect! [ws-url options]
+(defn ws-connect! [ws-url options]
   (assert (string? ws-url) "reqiured an url for ws server")
   (let [ws (js/WebSocket. ws-url)]
     (reset! *global-ws ws)
@@ -25,6 +25,6 @@
        (js/console.error "Failed to establish connection" error)
        (when-let [on-error! (:on-error! options)] (on-error! error))))))
 
-(defn send! [data]
+(defn ws-send! [data]
   (let [ws @*global-ws]
     (if (some? ws) (.send ws (pr-str data)) (.warn js/console "WebSocket at close state!"))))
