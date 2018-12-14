@@ -10,25 +10,25 @@
 (defn maintain-socket! [socket options]
   (let [sid (.generate shortid)]
     (swap! *global-connections assoc sid socket)
-    (when-let [on-open! (:on-open! options)] (on-open! sid socket))
+    (when-let [on-open (:on-open options)] (on-open sid socket))
     (.on
      socket
      "message"
      (fn [rawData]
-       (when-let [on-data! (:on-data! options)] (on-data! sid (read-string rawData)))))
+       (when-let [on-data (:on-data options)] (on-data sid (read-string rawData)))))
     (.on
      socket
      "close"
      (fn [event]
        (swap! *global-connections dissoc sid)
-       (when-let [on-close! (:on-close! options)] (on-close! sid event))))
+       (when-let [on-close (:on-close options)] (on-close sid event))))
     (.on
      socket
      "error"
      (fn [error]
        (swap! *global-connections dissoc sid)
-       (let [on-error! (:on-error! options)]
-         (if (some? on-error!) (on-error! error) (js/console.error error)))))))
+       (let [on-error (:on-error options)]
+         (if (some? on-error) (on-error error) (js/console.error error)))))))
 
 (defn wss-each! [handler] (doseq [[sid socket] @*global-connections] (handler sid socket)))
 
@@ -45,10 +45,10 @@
     (.on
      wss
      "listening"
-     (fn [] (when-let [on-listening! (:on-listening! options)] (on-listening!))))
+     (fn [] (when-let [on-listening (:on-listening options)] (on-listening))))
     (.on
      wss
      "error"
      (fn [error]
-       (let [on-error! (:on-error! options)]
-         (if (some? on-error!) (on-error! error) (js/console.error error)))))))
+       (let [on-error (:on-error options)]
+         (if (some? on-error) (on-error error) (js/console.error error)))))))
