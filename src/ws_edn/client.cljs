@@ -25,6 +25,8 @@
        (js/console.error "Failed to establish connection" error)
        (when-let [on-error (:on-error options)] (on-error error))))))
 
+(defn ws-connected? [] (some? @*global-ws))
+
 (defn ws-send! [data]
   (let [ws @*global-ws]
     (if (some? ws) (.send ws (pr-str data)) (.warn js/console "WebSocket at close state!"))))

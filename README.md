@@ -7,7 +7,7 @@ ws-edn adds a little abstraction to websocket
 [![Clojars Project](https://img.shields.io/clojars/v/mvc-works/ws-edn.svg)](https://clojars.org/mvc-works/ws-edn)
 
 ```edn
-[mvc-works/ws-edn "0.1.1"]
+[mvc-works/ws-edn "0.1.2"]
 ```
 
 ```clojure
@@ -34,6 +34,8 @@ ws-edn adds a little abstraction to websocket
     :on-error (fn [error] (println error))})
 
 (ws-edn.client/ws-send! data)
+
+(ws-edn.client/ws-connected?) ; true or false
 ```
 
 ### License

@@ -6,3 +6,4 @@
 .cpcache/
 .nrepl-port
 yarn-error.log
+*.xml
