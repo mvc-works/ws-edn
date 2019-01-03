@@ -7,7 +7,7 @@ ws-edn adds a little abstraction to websocket
 [![Clojars Project](https://img.shields.io/clojars/v/mvc-works/ws-edn.svg)](https://clojars.org/mvc-works/ws-edn)
 
 ```edn
-[mvc-works/ws-edn "0.1.2"]
+[mvc-works/ws-edn "0.1.3"]
 ```
 
 ```clojure

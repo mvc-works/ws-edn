@@ -41,12 +41,14 @@
 (defn wss-serve! [port options]
   (assert (number? port) "first argument is port")
   (let [WebSocketServer (.-Server ws), wss (new WebSocketServer (js-obj "port" port))]
-    (.on wss "connection" (fn [socket] (maintain-socket! socket options)))
+    (.on ^js wss "connection" (fn [socket] (maintain-socket! socket options)))
     (.on
+     ^js
      wss
      "listening"
      (fn [] (when-let [on-listening (:on-listening options)] (on-listening))))
     (.on
+     ^js
      wss
      "error"
      (fn [error]
