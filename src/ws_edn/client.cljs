@@ -1,5 +1,5 @@
 
-(ns ws-edn.client (:require [cljs.reader :refer [read-string]] [cljs.spec.alpha :as s]))
+(ns ws-edn.client (:require [cljs.reader :refer [read-string]]))
 
 (defonce *global-ws (atom nil))
 
@@ -29,4 +29,4 @@
 
 (defn ws-send! [data]
   (let [ws @*global-ws]
-    (if (some? ws) (.send ws (pr-str data)) (.warn js/console "WebSocket at close state!"))))
+    (if (some? ws) (.send ws (pr-str data)) (js/console.warn "WebSocket at close state!"))))

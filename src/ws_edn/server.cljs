@@ -1,14 +1,11 @@
 
 (ns ws-edn.server
-  (:require [cljs.reader :refer [read-string]]
-            ["ws" :as ws]
-            ["shortid" :as shortid]
-            [cljs.spec.alpha :as s]))
+  (:require [cljs.reader :refer [read-string]] ["ws" :as ws] ["shortid" :as shortid]))
 
 (defonce *global-connections (atom {}))
 
-(defn maintain-socket! [socket options]
-  (let [sid (.generate shortid)]
+(defn maintain-socket! [^js socket options]
+  (let [sid (shortid/generate)]
     (swap! *global-connections assoc sid socket)
     (when-let [on-open (:on-open options)] (on-open sid socket))
     (.on
@@ -41,14 +38,12 @@
 (defn wss-serve! [port options]
   (assert (number? port) "first argument is port")
   (let [WebSocketServer (.-Server ws), wss (new WebSocketServer (js-obj "port" port))]
-    (.on ^js wss "connection" (fn [socket] (maintain-socket! socket options)))
+    (.on wss "connection" (fn [socket] (maintain-socket! socket options)))
     (.on
-     ^js
      wss
      "listening"
      (fn [] (when-let [on-listening (:on-listening options)] (on-listening))))
     (.on
-     ^js
      wss
      "error"
      (fn [error]
