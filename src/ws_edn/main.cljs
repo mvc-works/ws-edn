@@ -15,4 +15,4 @@
    (fn [] (println "heartbeat") (wss-each! (fn [sid socket] (println sid socket))))
    2000))
 
-(defn reload! [] (println "reload!"))
+(defn ^:dev/after-load reload! [] (println "reload!"))

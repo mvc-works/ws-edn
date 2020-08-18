@@ -10,4 +10,4 @@
     :on-close (fn [event] (println "close"))})
   (js/setInterval (fn [] (println (ws-connected?))) 2000))
 
-(defn reload! [] (println "reload"))
+(defn ^:dev/after-load reload! [] (println "reload"))
