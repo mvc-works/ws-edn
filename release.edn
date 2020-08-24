@@ -1,6 +1,7 @@
-{:version "0.1.4-a1"
- :group-id "mvc-works"
- :artifact-id "ws-edn"
- :skip-tag true
- :description "WebSocket wrapper in ClojureScript"
+{:version "0.1.4",
+ :group-id "mvc-works",
+ :artifact-id "ws-edn",
+ :skip-tag true,
+ :description "WebSocket wrapper in ClojureScript",
  :scm-url "https://github.com/mvc-works/ws-edn"}
+
